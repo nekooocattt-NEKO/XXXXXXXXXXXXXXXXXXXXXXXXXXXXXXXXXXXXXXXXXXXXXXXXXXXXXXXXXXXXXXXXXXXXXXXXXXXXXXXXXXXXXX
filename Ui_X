@@ -3,64 +3,57 @@ local services = setmetatable({}, { __index = function(_, k) return game:GetServ
 local ts, uis, lplr = services.TweenService, services.UserInputService, services.Players.LocalPlayer
 local playerGui = lplr:WaitForChild("PlayerGui")
 local isMobile = uis.TouchEnabled
-
 local C = {
-    Accent        = Color3.fromRGB(168, 130, 255),
-    AccentDim     = Color3.fromRGB(120,  95, 200),
-    AccentGlow    = Color3.fromRGB(190, 160, 255),
-    Cyan          = Color3.fromRGB(110, 215, 255),
-    CyanDim       = Color3.fromRGB(35,  65,  95),
-    MainBG        = Color3.fromRGB(10,   9,  20),
-    SideBG        = Color3.fromRGB(16,  13,  26),
-    CardBG        = Color3.fromRGB(22,  19,  34),
-    ItemBG        = Color3.fromRGB(28,  24,  42),
-    HoverBG       = Color3.fromRGB(48,  38,  68),
-    Text          = Color3.fromRGB(185, 175, 215),
-    TextMid       = Color3.fromRGB(215, 205, 235),
-    TextHi        = Color3.fromRGB(240, 230, 255),
-    TextAccent    = Color3.fromRGB(195, 165, 255),
-    TextCyan      = Color3.fromRGB(135, 215, 255),
-    Divider       = Color3.fromRGB(95,   85, 135),
-    DividerBright = Color3.fromRGB(175, 155, 215),
-    ToggleOff     = Color3.fromRGB(42,  32,  58),
-    ToggleOn      = Color3.fromRGB(135,  95, 215),
-    DotOff        = Color3.fromRGB(95,   85, 135),
-    Red           = Color3.fromRGB(255, 115, 135),
-    Green         = Color3.fromRGB(135, 215, 175),
-    White         = Color3.fromRGB(230, 225, 250)
+    Accent = Color3.fromRGB(165, 216, 255),
+    AccentDim = Color3.fromRGB(100, 150, 220),
+    AccentGlow = Color3.fromRGB(200, 230, 255),
+    Cyan = Color3.fromRGB(180, 220, 255),
+    CyanDim = Color3.fromRGB(60, 100, 140),
+    MainBG = Color3.fromRGB(8, 10, 18),
+    SideBG = Color3.fromRGB(12, 15, 25),
+    CardBG = Color3.fromRGB(18, 22, 35),
+    ItemBG = Color3.fromRGB(25, 30, 45),
+    HoverBG = Color3.fromRGB(40, 60, 90),
+    Text = Color3.fromRGB(200, 220, 245),
+    TextMid = Color3.fromRGB(220, 235, 255),
+    TextHi = Color3.fromRGB(240, 248, 255),
+    TextAccent = Color3.fromRGB(180, 210, 255),
+    TextCyan = Color3.fromRGB(200, 230, 255),
+    Divider = Color3.fromRGB(80, 120, 180),
+    DividerBright = Color3.fromRGB(140, 180, 240),
+    ToggleOff = Color3.fromRGB(40, 50, 70),
+    ToggleOn = Color3.fromRGB(120, 180, 240),
+    DotOff = Color3.fromRGB(90, 120, 160),
+    Red = Color3.fromRGB(255, 140, 160),
+    Green = Color3.fromRGB(140, 220, 180),
+    White = Color3.fromRGB(240, 245, 255)
 }
-
 local function Tween(obj, info, prop)
     local t = ts:Create(obj, TweenInfo.new(unpack(info)), prop)
     t:Play()
     return t
 end
-
 local function AddStroke(parent, color, thickness, transparency)
     local s = Instance.new("UIStroke", parent)
     s.Color, s.Thickness, s.Transparency = color or C.Divider, thickness or 1, transparency or 0
     return s
 end
-
 local function AddCorner(parent, radius)
     local c = Instance.new("UICorner", parent)
     c.CornerRadius = UDim.new(0, radius or 8)
     return c
 end
-
 local function AddPadding(parent, top, bottom, left, right)
     local p = Instance.new("UIPadding", parent)
     p.PaddingTop, p.PaddingBottom = UDim.new(0, top or 0), UDim.new(0, bottom or 0)
     p.PaddingLeft, p.PaddingRight = UDim.new(0, left or 0), UDim.new(0, right or 0)
     return p
 end
-
 local function AddGradient(parent, c0, c1, rot)
     local g = Instance.new("UIGradient", parent)
     g.Color, g.Rotation = ColorSequence.new(c0, c1), rot or 0
     return g
 end
-
 local function AddTextStroke(label, thickness, transparency)
     local s = Instance.new("UIStroke", label)
     s.Color = Color3.fromRGB(0, 0, 0)
@@ -69,46 +62,36 @@ local function AddTextStroke(label, thickness, transparency)
     s.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
     return s
 end
-
 function lib.new(name)
     local cfg = {
-        MainSize   = isMobile and UDim2.new(0, 540, 0, 320) or UDim2.new(0, 680, 0, 480),
-        SideWidth  = isMobile and 140 or 165,
-        BarHeight  = isMobile and 50 or 56,
+        MainSize = isMobile and UDim2.new(0, 540, 0, 320) or UDim2.new(0, 680, 0, 480),
+        SideWidth = isMobile and 140 or 165,
+        BarHeight = isMobile and 50 or 56,
         ItemHeight = isMobile and 40 or 34,
-        FontSize   = isMobile and 15 or 13,
-        TitleSize  = isMobile and 17 or 16
+        FontSize = isMobile and 15 or 13,
+        TitleSize = isMobile and 17 or 16
     }
-
     local old = playerGui:FindFirstChild("yuzia_X")
     if old then old:Destroy() end
-
     local sg = Instance.new("ScreenGui", playerGui)
     sg.Name, sg.ResetOnSpawn, sg.IgnoreGuiInset = "yuzia_X", false, true
-
     local Backdrop = Instance.new("Frame", sg)
     Backdrop.Size, Backdrop.BackgroundColor3, Backdrop.BackgroundTransparency, Backdrop.ZIndex = UDim2.new(1, 0, 1, 0), Color3.new(0,0,0), 1, 0
-
     local Main = Instance.new("Frame", sg)
     Main.Size = cfg.MainSize
     Main.Position = UDim2.new(0.5, -Main.Size.X.Offset/2, 0.5, -Main.Size.Y.Offset/2)
     Main.BackgroundColor3, Main.BackgroundTransparency, Main.ZIndex, Main.ClipsDescendants = C.MainBG, 1, 1, true
     AddCorner(Main, 24)
-
     local MainClip = Instance.new("Frame", Main)
     MainClip.Size, MainClip.BackgroundTransparency, MainClip.ClipsDescendants, MainClip.ZIndex = UDim2.new(1, 0, 1, 0), 1, true, 1
     AddCorner(MainClip, 24)
-
     local MainStroke = AddStroke(Main, C.White, 1.2, 0.92)
-
     local TopGlow = Instance.new("Frame", Main)
     TopGlow.Size, TopGlow.BackgroundColor3, TopGlow.ZIndex, TopGlow.BackgroundTransparency = UDim2.new(1, 0, 0, 3), C.White, 20, 0.6
     AddCorner(TopGlow, 1.5)
     AddGradient(TopGlow, C.Cyan, C.Accent, 0)
-
     local scale = Instance.new("UIScale", Main)
     scale.Scale = 0.85
-
     task.defer(function()
         Tween(Backdrop, {0.4, Enum.EasingStyle.Sine}, {BackgroundTransparency = 0.92})
         Tween(Main, {0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out}, {BackgroundTransparency = 0.78})
@@ -118,38 +101,32 @@ function lib.new(name)
             Tween(scale, {0.16, Enum.EasingStyle.Sine}, {Scale = 1})
         end)
     end)
-
     local TitleBar = Instance.new("Frame", MainClip)
     TitleBar.Size, TitleBar.BackgroundTransparency, TitleBar.ZIndex = UDim2.new(0, cfg.SideWidth + 6, 0, cfg.BarHeight), 1, 2
-
     local Title = Instance.new("TextLabel", TitleBar)
     Title.Size, Title.Position, Title.Text, Title.TextColor3, Title.Font, Title.TextSize = UDim2.new(1, -36, 0, 24), UDim2.new(0, 26, 0, 12), name, C.TextHi, Enum.Font.GothamBold, cfg.TitleSize
     Title.BackgroundTransparency, Title.TextXAlignment = 1, Enum.TextXAlignment.Left
     AddTextStroke(Title, 1.5, 0.38)
-
     local VerTag = Instance.new("TextLabel", TitleBar)
     VerTag.Size, VerTag.Position, VerTag.Text, VerTag.TextColor3, VerTag.Font, VerTag.TextSize = UDim2.new(0, 42, 0, 16), UDim2.new(0, 26, 0, isMobile and 32 or 36), "NEKO", C.Cyan, Enum.Font.GothamBold, 10
     VerTag.BackgroundColor3, VerTag.BackgroundTransparency = C.CyanDim, 0.25
     AddCorner(VerTag, 5)
     AddStroke(VerTag, C.White, 1.1, 0.55)
-
     local HDivider = Instance.new("Frame", MainClip)
     HDivider.Size, HDivider.Position, HDivider.BackgroundColor3, HDivider.ZIndex = UDim2.new(1, -24, 0, 1.5), UDim2.new(0, 12, 0, cfg.BarHeight), C.White, 2
     local hg = Instance.new("UIGradient", HDivider)
     hg.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0,   C.MainBG),
+        ColorSequenceKeypoint.new(0, C.MainBG),
         ColorSequenceKeypoint.new(0.2, C.CyanDim),
         ColorSequenceKeypoint.new(0.5, C.Accent),
         ColorSequenceKeypoint.new(0.8, C.CyanDim),
-        ColorSequenceKeypoint.new(1,   C.MainBG)
+        ColorSequenceKeypoint.new(1, C.MainBG)
     })
-
     local TopBar = Instance.new("Frame", MainClip)
     TopBar.Size, TopBar.Position, TopBar.BackgroundTransparency, TopBar.ZIndex = UDim2.new(1, -(cfg.SideWidth + 24), 0, cfg.BarHeight), UDim2.new(0, cfg.SideWidth + 12, 0, 0), 1, 2
     local tl = Instance.new("UIListLayout", TopBar)
     tl.FillDirection, tl.VerticalAlignment, tl.Padding = Enum.FillDirection.Horizontal, Enum.VerticalAlignment.Center, UDim.new(0, 6)
     AddPadding(TopBar, 0, 0, 6, 0)
-
     local SideBar = Instance.new("Frame", MainClip)
     SideBar.Size, SideBar.Position, SideBar.BackgroundColor3, SideBar.BackgroundTransparency, SideBar.ZIndex = UDim2.new(0, cfg.SideWidth, 1, -(cfg.BarHeight + 24)), UDim2.new(0, 12, 0, cfg.BarHeight + 12), C.SideBG, 0.82, 2
     AddCorner(SideBar, 16)
@@ -157,51 +134,40 @@ function lib.new(name)
     local sl = Instance.new("UIListLayout", SideBar)
     sl.Padding, sl.HorizontalAlignment = UDim.new(0, 5), Enum.HorizontalAlignment.Center
     AddPadding(SideBar, 12, 12, 10, 10)
-
     local Pages = Instance.new("Frame", MainClip)
     Pages.Size, Pages.Position, Pages.BackgroundTransparency, Pages.ZIndex = UDim2.new(1, -(cfg.SideWidth + 36), 1, -(cfg.BarHeight + 24)), UDim2.new(0, cfg.SideWidth + 24, 0, cfg.BarHeight + 12), 1, 2
-
     local window = {currentMain = nil, currentSub = nil}
-
     function window:Toggle(state)
         sg.Enabled = state
     end
-
     function window:MainTab(mName)
         local mBtn = Instance.new("TextButton", TopBar)
         mBtn.Size, mBtn.BackgroundColor3, mBtn.BackgroundTransparency, mBtn.Text, mBtn.TextColor3 = UDim2.new(0, isMobile and 80 or 94, 0, 34), C.CardBG, 1, mName, C.Text
         mBtn.Font, mBtn.TextSize, mBtn.ZIndex = Enum.Font.GothamBold, cfg.FontSize, 3
         AddCorner(mBtn, 18)
         AddTextStroke(mBtn, 1.3, 0.42)
-
         local mLine = Instance.new("Frame", mBtn)
         mLine.Size, mLine.Position, mLine.AnchorPoint, mLine.BackgroundColor3, mLine.ZIndex = UDim2.new(0, 0, 0, 2.5), UDim2.new(0.5, 0, 1, 0), Vector2.new(0.5, 0), C.White, 4
         AddCorner(mLine, 1.2)
         AddGradient(mLine, C.Cyan, C.Accent, 0)
-
         local subList, mainInst = {}, {}
-
         function mainInst:SubTab(sName)
             local sBtn = Instance.new("TextButton", SideBar)
-            sBtn.Size, sBtn.BackgroundColor3, sBtn.BackgroundTransparency, sBtn.Text, sBtn.TextColor3 = UDim2.new(1, 0, 0, cfg.ItemHeight), C.ItemBG, 1, "  " .. sName, C.Text
+            sBtn.Size, sBtn.BackgroundColor3, sBtn.BackgroundTransparency, sBtn.Text, sBtn.TextColor3 = UDim2.new(1, 0, 0, cfg.ItemHeight), C.ItemBG, 1, " " .. sName, C.Text
             sBtn.Font, sBtn.TextSize, sBtn.TextXAlignment, sBtn.Visible, sBtn.ZIndex = Enum.Font.GothamMedium, cfg.FontSize, Enum.TextXAlignment.Left, false, 3
             AddCorner(sBtn, 12)
             AddTextStroke(sBtn, 1.3, 0.42)
-
             local sIndicator = Instance.new("Frame", sBtn)
             sIndicator.Size, sIndicator.Position, sIndicator.AnchorPoint, sIndicator.BackgroundColor3, sIndicator.ZIndex = UDim2.new(0, 3.5, 0, 0), UDim2.new(0, 0, 0.5, 0), Vector2.new(0, 0.5), C.White, 4
             AddCorner(sIndicator, 2)
             AddGradient(sIndicator, C.Cyan, C.Accent, 90)
-
             local Page = Instance.new("ScrollingFrame", Pages)
             Page.Size, Page.ScrollBarThickness, Page.ScrollBarImageColor3, Page.BackgroundTransparency, Page.Visible = UDim2.new(1, 0, 1, 0), 2.5, C.Accent, 1, false
             Page.CanvasSize, Page.AutomaticCanvasSize, Page.ZIndex = UDim2.new(0, 0, 0, 0), Enum.AutomaticSize.Y, 3
             local pl = Instance.new("UIListLayout", Page)
             pl.Padding = UDim.new(0, 9)
             AddPadding(Page, 6, 16, 0, 6)
-
             table.insert(subList, {btn = sBtn, page = Page, indicator = sIndicator})
-
             local function activateSub()
                 if window.currentSub then
                     window.currentSub.page.Visible = false
@@ -213,24 +179,19 @@ function lib.new(name)
                 Tween(sIndicator, {0.22, Enum.EasingStyle.Back}, {Size = UDim2.new(0, 3.5, 0, 22)})
                 window.currentSub = {btn = sBtn, page = Page, indicator = sIndicator}
             end
-
             sBtn.MouseButton1Click:Connect(activateSub)
             local subObj = {activate = activateSub}
-
             function subObj:Section(txt)
                 local Sec = Instance.new("Frame", Page)
                 Sec.Name, Sec.Size, Sec.BackgroundColor3, Sec.BackgroundTransparency, Sec.ZIndex = "Section_" .. txt, UDim2.new(1, -8, 0, 48), C.CardBG, 0.72, 4
                 AddCorner(Sec, 16)
                 AddStroke(Sec, C.White, 1.1, 0.7)
-
                 local TitleRow = Instance.new("Frame", Sec)
                 TitleRow.Size, TitleRow.BackgroundTransparency, TitleRow.ZIndex = UDim2.new(1, 0, 0, isMobile and 42 or 38), 1, 5
-
                 local T = Instance.new("TextLabel", TitleRow)
                 T.Size, T.Position, T.Text, T.TextColor3, T.Font, T.TextSize = UDim2.new(1, -36, 1, 0), UDim2.new(0, 22, 0, 0), txt:upper(), C.Cyan, Enum.Font.GothamBold, 11
                 T.TextXAlignment, T.BackgroundTransparency, T.ZIndex = Enum.TextXAlignment.Left, 1, 6
                 AddTextStroke(T, 1.4, 0.38)
-
                 local Box = Instance.new("Frame", Sec)
                 Box.Name, Box.Size, Box.Position, Box.BackgroundTransparency, Box.ZIndex = "Container", UDim2.new(1, -24, 0, 0), UDim2.new(0, 12, 0, isMobile and 42 or 46), 1, 5
                 local bl = Instance.new("UIListLayout", Box)
@@ -239,9 +200,7 @@ function lib.new(name)
                     Box.Size = UDim2.new(1, -24, 0, bl.AbsoluteContentSize.Y)
                     Sec.Size = UDim2.new(1, -8, 0, bl.AbsoluteContentSize.Y + (isMobile and 52 or 56))
                 end)
-
                 local e = {}
-
                 function e:Button(t, cb)
                     local b = Instance.new("TextButton", Box)
                     b.Size, b.BackgroundColor3, b.BackgroundTransparency, b.Text = UDim2.new(1, 0, 0, cfg.ItemHeight), C.ItemBG, 0.65, t
@@ -254,7 +213,6 @@ function lib.new(name)
                     b.MouseButton1Click:Connect(function() if cb then cb() end end)
                     return b
                 end
-
                 function e:Toggle(t, default, cb)
                     if type(default) == "function" then cb = default; default = false end
                     local row = Instance.new("Frame", Box)
@@ -293,7 +251,6 @@ function lib.new(name)
                         end
                     }
                 end
-
                 function e:Textbox(p, d, cb)
                     local wrap = Instance.new("Frame", Box)
                     wrap.Size, wrap.BackgroundColor3, wrap.BackgroundTransparency = UDim2.new(1, 0, 0, cfg.ItemHeight), C.ItemBG, 0.65
@@ -308,10 +265,8 @@ function lib.new(name)
                     b.FocusLost:Connect(function() Tween(wrap, {0.14}, {BackgroundTransparency = 0.65}) if cb then cb(b.Text) end end)
                     return b
                 end
-
                 return e
             end
-
             function subObj:List(txt, data_func, select_cb)
                 local box_ref = nil
                 local function Refresh()
@@ -341,10 +296,8 @@ function lib.new(name)
                 end)
                 return {Refresh = Refresh}
             end
-
             return subObj
         end
-
         mBtn.MouseButton1Click:Connect(function()
             if window.currentMain and window.currentMain.btn == mBtn then return end
             if window.currentMain then
@@ -358,10 +311,8 @@ function lib.new(name)
             for _, item in pairs(subList) do item.btn.Visible = true end
             if subList[1] then subList[1].activate() end
         end)
-
         return mainInst
     end
-
     local dragging, dragInput, dragStart, startPos = false, nil, nil, nil
     Main.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -375,8 +326,6 @@ function lib.new(name)
             Tween(Main, {0.12, Enum.EasingStyle.Sine}, {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)})
         end
     end)
-
     return window
 end
-
 return lib
