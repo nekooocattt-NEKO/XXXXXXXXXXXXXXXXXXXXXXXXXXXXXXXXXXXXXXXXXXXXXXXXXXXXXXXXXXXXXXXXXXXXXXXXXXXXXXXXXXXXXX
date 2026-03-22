@@ -1,0 +1,375 @@
+local lib = {}
+local services = setmetatable({}, { __index = function(_, k) return game:GetService(k) end })
+local ts, uis, lplr = services.TweenService, services.UserInputService, services.Players.LocalPlayer
+local playerGui = lplr:WaitForChild("PlayerGui")
+local isMobile = uis.TouchEnabled
+
+local C = {
+    Accent        = Color3.fromRGB(255, 200, 215),
+    AccentDim     = Color3.fromRGB(200, 140, 160),
+    AccentGlow    = Color3.fromRGB(255, 220, 230),
+    Cyan          = Color3.fromRGB(240, 190, 205),
+    CyanDim       = Color3.fromRGB(60,  30,  40),
+    MainBG        = Color3.fromRGB(10,  8,   12),
+    SideBG        = Color3.fromRGB(15,  10,  18),
+    CardBG        = Color3.fromRGB(20,  14,  24),
+    ItemBG        = Color3.fromRGB(25,  18,  30),
+    HoverBG       = Color3.fromRGB(40,  25,  45),
+    Text          = Color3.fromRGB(200, 175, 188),
+    TextMid       = Color3.fromRGB(235, 210, 220),
+    TextHi        = Color3.fromRGB(255, 245, 248),
+    TextAccent    = Color3.fromRGB(255, 200, 215),
+    TextCyan      = Color3.fromRGB(240, 190, 205),
+    Divider       = Color3.fromRGB(255, 255, 255),
+    DividerBright = Color3.fromRGB(255, 255, 255),
+    ToggleOff     = Color3.fromRGB(35,  25,  40),
+    ToggleOn      = Color3.fromRGB(180, 110, 140),
+    DotOff        = Color3.fromRGB(120, 90,  110),
+    Red           = Color3.fromRGB(255, 100, 120),
+    Green         = Color3.fromRGB(150, 230, 180),
+    White         = Color3.fromRGB(255, 255, 255)
+}
+
+local function Tween(obj, info, prop)
+    local t = ts:Create(obj, TweenInfo.new(unpack(info)), prop)
+    t:Play()
+    return t
+end
+
+local function AddStroke(parent, color, thickness, transparency)
+    local s = Instance.new("UIStroke", parent)
+    s.Color, s.Thickness, s.Transparency = color or C.Divider, thickness or 1, transparency or 0
+    return s
+end
+
+local function AddCorner(parent, radius)
+    local c = Instance.new("UICorner", parent)
+    c.CornerRadius = UDim.new(0, radius or 8)
+    return c
+end
+
+local function AddPadding(parent, top, bottom, left, right)
+    local p = Instance.new("UIPadding", parent)
+    p.PaddingTop, p.PaddingBottom = UDim.new(0, top or 0), UDim.new(0, bottom or 0)
+    p.PaddingLeft, p.PaddingRight = UDim.new(0, left or 0), UDim.new(0, right or 0)
+    return p
+end
+
+local function AddGradient(parent, c0, c1, rot)
+    local g = Instance.new("UIGradient", parent)
+    g.Color, g.Rotation = ColorSequence.new(c0, c1), rot or 0
+    return g
+end
+
+local function AddTextStroke(label, thickness, transparency)
+    local s = Instance.new("UIStroke", label)
+    s.Color = Color3.fromRGB(0, 0, 0)
+    s.Thickness = thickness or 1.5
+    s.Transparency = transparency or 0.35
+    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+    return s
+end
+
+function lib.new(name)
+    local cfg = {
+        MainSize   = isMobile and UDim2.new(0, 520, 0, 310) or UDim2.new(0, 660, 0, 460),
+        SideWidth  = isMobile and 130 or 155,
+        BarHeight  = isMobile and 48 or 54,
+        ItemHeight = isMobile and 38 or 32,
+        FontSize   = isMobile and 14 or 12,
+        TitleSize  = isMobile and 16 or 15
+    }
+
+    local old = playerGui:FindFirstChild("yuzia_X")
+    if old then old:Destroy() end
+
+    local sg = Instance.new("ScreenGui", playerGui)
+    sg.Name, sg.ResetOnSpawn, sg.IgnoreGuiInset = "yuzia_X", false, true
+
+    local Backdrop = Instance.new("Frame", sg)
+    Backdrop.Size, Backdrop.BackgroundColor3, Backdrop.BackgroundTransparency, Backdrop.ZIndex = UDim2.new(1, 0, 1, 0), Color3.new(0,0,0), 1, 0
+
+    local Main = Instance.new("Frame", sg)
+    Main.Size = cfg.MainSize
+    Main.Position = UDim2.new(0.5, -Main.Size.X.Offset/2, 0.5, -Main.Size.Y.Offset/2)
+    Main.BackgroundColor3, Main.BackgroundTransparency, Main.ZIndex, Main.ClipsDescendants = C.MainBG, 1, 1, false
+    AddCorner(Main, 20)
+
+    local MainClip = Instance.new("Frame", Main)
+    MainClip.Size, MainClip.BackgroundTransparency, MainClip.ClipsDescendants, MainClip.ZIndex = UDim2.new(1, 0, 1, 0), 1, true, 1
+    AddCorner(MainClip, 20)
+
+    local MainStroke = AddStroke(Main, C.White, 1, 1)
+
+    local TopGlow = Instance.new("Frame", Main)
+    TopGlow.Size, TopGlow.BackgroundColor3, TopGlow.ZIndex = UDim2.new(1, 0, 0, 2), C.White, 20
+    AddCorner(TopGlow, 1)
+    AddGradient(TopGlow, C.Cyan, C.Accent, 0)
+
+    local scale = Instance.new("UIScale", Main)
+    scale.Scale = 0.88
+    task.defer(function()
+        Tween(Backdrop, {0.3}, {BackgroundTransparency = 1})
+        Tween(Main, {0.28}, {BackgroundTransparency = 0.82})
+        Tween(MainStroke, {0.28}, {Transparency = 0.3})
+        local pop = Tween(scale, {0.22, Enum.EasingStyle.Back}, {Scale = 1.025})
+        pop.Completed:Connect(function() Tween(scale, {0.14}, {Scale = 1}) end)
+    end)
+
+    local TitleBar = Instance.new("Frame", MainClip)
+    TitleBar.Size, TitleBar.BackgroundTransparency, TitleBar.ZIndex = UDim2.new(0, cfg.SideWidth + 5, 0, cfg.BarHeight), 1, 2
+
+    local Title = Instance.new("TextLabel", TitleBar)
+    Title.Size, Title.Position, Title.Text, Title.TextColor3, Title.Font, Title.TextSize = UDim2.new(1, -30, 0, 22), UDim2.new(0, 24, 0, 10), name, C.TextHi, Enum.Font.GothamBold, cfg.TitleSize
+    Title.BackgroundTransparency, Title.TextXAlignment = 1, Enum.TextXAlignment.Left
+    AddTextStroke(Title, 1.5, 0.4)
+
+    local VerTag = Instance.new("TextLabel", TitleBar)
+    VerTag.Size, VerTag.Position, VerTag.Text, VerTag.TextColor3, VerTag.Font, VerTag.TextSize = UDim2.new(0, 38, 0, 14), UDim2.new(0, 24, 0, isMobile and 30 or 34), "NEKO", C.Cyan, Enum.Font.GothamBold, 9
+    VerTag.BackgroundColor3, VerTag.BackgroundTransparency = C.CyanDim, 0.3
+    AddCorner(VerTag, 4)
+    AddStroke(VerTag, C.White, 1, 0.6)
+
+    local HDivider = Instance.new("Frame", MainClip)
+    HDivider.Size, HDivider.Position, HDivider.BackgroundColor3, HDivider.ZIndex = UDim2.new(1, -20, 0, 1), UDim2.new(0, 10, 0, cfg.BarHeight), C.White, 2
+    local hg = Instance.new("UIGradient", HDivider)
+    hg.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0,   Color3.fromRGB(10, 8, 12)),
+        ColorSequenceKeypoint.new(0.3, C.Cyan),
+        ColorSequenceKeypoint.new(0.7, C.Accent),
+        ColorSequenceKeypoint.new(1,   Color3.fromRGB(10, 8, 12))
+    })
+
+    local TopBar = Instance.new("Frame", MainClip)
+    TopBar.Size, TopBar.Position, TopBar.BackgroundTransparency, TopBar.ZIndex = UDim2.new(1, -(cfg.SideWidth + 20), 0, cfg.BarHeight), UDim2.new(0, cfg.SideWidth + 10, 0, 0), 1, 2
+    local tl = Instance.new("UIListLayout", TopBar)
+    tl.FillDirection, tl.VerticalAlignment, tl.Padding = Enum.FillDirection.Horizontal, Enum.VerticalAlignment.Center, UDim.new(0, 4)
+    AddPadding(TopBar, 0, 0, 5, 0)
+
+    local SideBar = Instance.new("Frame", MainClip)
+    SideBar.Size, SideBar.Position, SideBar.BackgroundColor3, SideBar.BackgroundTransparency, SideBar.ZIndex = UDim2.new(0, cfg.SideWidth, 1, -(cfg.BarHeight + 20)), UDim2.new(0, 10, 0, cfg.BarHeight + 10), C.SideBG, 0.85, 2
+    AddCorner(SideBar, 14)
+    AddStroke(SideBar, C.White, 1, 0.7)
+    local sl = Instance.new("UIListLayout", SideBar)
+    sl.Padding, sl.HorizontalAlignment = UDim.new(0, 4), Enum.HorizontalAlignment.Center
+    AddPadding(SideBar, 10, 10, 8, 8)
+
+    local Pages = Instance.new("Frame", MainClip)
+    Pages.Size, Pages.Position, Pages.BackgroundTransparency, Pages.ZIndex = UDim2.new(1, -(cfg.SideWidth + 30), 1, -(cfg.BarHeight + 20)), UDim2.new(0, cfg.SideWidth + 20, 0, cfg.BarHeight + 10), 1, 2
+
+    local window = {currentMain = nil, currentSub = nil}
+
+    function window:Toggle(state)
+        sg.Enabled = state
+    end
+
+    function window:MainTab(mName)
+        local mBtn = Instance.new("TextButton", TopBar)
+        mBtn.Size, mBtn.BackgroundColor3, mBtn.BackgroundTransparency, mBtn.Text, mBtn.TextColor3 = UDim2.new(0, isMobile and 75 or 88, 0, 32), C.CardBG, 1, mName, C.Text
+        mBtn.Font, mBtn.TextSize, mBtn.ZIndex = Enum.Font.GothamBold, cfg.FontSize, 3
+        AddCorner(mBtn, 16)
+        AddTextStroke(mBtn, 1.2, 0.45)
+
+        local mLine = Instance.new("Frame", mBtn)
+        mLine.Size, mLine.Position, mLine.AnchorPoint, mLine.BackgroundColor3, mLine.ZIndex = UDim2.new(0, 0, 0, 2), UDim2.new(0.5, 0, 1, 0), Vector2.new(0.5, 0), C.White, 4
+        AddCorner(mLine, 1)
+        AddGradient(mLine, C.Cyan, C.Accent, 0)
+
+        local subList, mainInst = {}, {}
+
+        function mainInst:SubTab(sName)
+            local sBtn = Instance.new("TextButton", SideBar)
+            sBtn.Size, sBtn.BackgroundColor3, sBtn.BackgroundTransparency, sBtn.Text, sBtn.TextColor3 = UDim2.new(1, 0, 0, cfg.ItemHeight), C.ItemBG, 1, "  " .. sName, C.Text
+            sBtn.Font, sBtn.TextSize, sBtn.TextXAlignment, sBtn.Visible, sBtn.ZIndex = Enum.Font.GothamMedium, cfg.FontSize, Enum.TextXAlignment.Left, false, 3
+            AddCorner(sBtn, 10)
+            AddTextStroke(sBtn, 1.2, 0.45)
+
+            local sIndicator = Instance.new("Frame", sBtn)
+            sIndicator.Size, sIndicator.Position, sIndicator.AnchorPoint, sIndicator.BackgroundColor3, sIndicator.ZIndex = UDim2.new(0, 3, 0, 0), UDim2.new(0, 0, 0.5, 0), Vector2.new(0, 0.5), C.White, 4
+            AddCorner(sIndicator, 2)
+            AddGradient(sIndicator, C.Cyan, C.Accent, 90)
+
+            local Page = Instance.new("ScrollingFrame", Pages)
+            Page.Size, Page.ScrollBarThickness, Page.ScrollBarImageColor3, Page.BackgroundTransparency, Page.Visible = UDim2.new(1, 0, 1, 0), 2, C.Accent, 1, false
+            Page.CanvasSize, Page.AutomaticCanvasSize, Page.ZIndex = UDim2.new(0, 0, 0, 0), Enum.AutomaticSize.Y, 3
+            local pl = Instance.new("UIListLayout", Page)
+            pl.Padding = UDim.new(0, 8)
+            AddPadding(Page, 4, 14, 0, 5)
+
+            table.insert(subList, {btn = sBtn, page = Page, indicator = sIndicator})
+
+            local function activateSub()
+                if window.currentSub then
+                    window.currentSub.page.Visible = false
+                    Tween(window.currentSub.btn, {0.2}, {BackgroundTransparency = 1, TextColor3 = C.Text})
+                    Tween(window.currentSub.indicator, {0.2}, {Size = UDim2.new(0, 3, 0, 0)})
+                end
+                Page.Visible = true
+                Tween(sBtn, {0.2}, {BackgroundTransparency = 0.75, TextColor3 = C.TextHi})
+                Tween(sIndicator, {0.2}, {Size = UDim2.new(0, 3, 0, 18)})
+                window.currentSub = {btn = sBtn, page = Page, indicator = sIndicator}
+            end
+
+            sBtn.MouseButton1Click:Connect(activateSub)
+            local subObj = {activate = activateSub}
+
+            function subObj:Section(txt)
+                local Sec = Instance.new("Frame", Page)
+                Sec.Name, Sec.Size, Sec.BackgroundColor3, Sec.BackgroundTransparency, Sec.ZIndex = "Section_" .. txt, UDim2.new(1, -6, 0, 44), C.CardBG, 0.75, 4
+                AddCorner(Sec, 14)
+                AddStroke(Sec, C.White, 1, 0.75)
+
+                local TitleRow = Instance.new("Frame", Sec)
+                TitleRow.Size, TitleRow.BackgroundTransparency, TitleRow.ZIndex = UDim2.new(1, 0, 0, isMobile and 40 or 36), 1, 5
+
+                local T = Instance.new("TextLabel", TitleRow)
+                T.Size, T.Position, T.Text, T.TextColor3, T.Font, T.TextSize = UDim2.new(1, -30, 1, 0), UDim2.new(0, 20, 0, 0), txt:upper(), C.Cyan, Enum.Font.GothamBold, 10
+                T.TextXAlignment, T.BackgroundTransparency, T.ZIndex = Enum.TextXAlignment.Left, 1, 6
+                AddTextStroke(T, 1.2, 0.4)
+
+                local Box = Instance.new("Frame", Sec)
+                Box.Name, Box.Size, Box.Position, Box.BackgroundTransparency, Box.ZIndex = "Container", UDim2.new(1, -20, 0, 0), UDim2.new(0, 10, 0, isMobile and 40 or 44), 1, 5
+                local bl = Instance.new("UIListLayout", Box)
+                bl.Padding = UDim.new(0, 5)
+                bl:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                    Box.Size = UDim2.new(1, -20, 0, bl.AbsoluteContentSize.Y)
+                    Sec.Size = UDim2.new(1, -6, 0, bl.AbsoluteContentSize.Y + (isMobile and 48 or 52))
+                end)
+
+                local e = {}
+
+                function e:Button(t, cb)
+                    local b = Instance.new("TextButton", Box)
+                    b.Size, b.BackgroundColor3, b.BackgroundTransparency, b.Text = UDim2.new(1, 0, 0, cfg.ItemHeight), C.ItemBG, 0.7, t
+                    b.TextColor3, b.Font, b.TextSize, b.ZIndex = C.TextMid, Enum.Font.GothamMedium, cfg.FontSize, 6
+                    AddCorner(b, 9)
+                    AddStroke(b, C.White, 1, 0.85)
+                    AddTextStroke(b, 1.2, 0.4)
+                    b.MouseButton1Click:Connect(function() if cb then cb() end end)
+                    return b
+                end
+
+                function e:Toggle(t, default, cb)
+                    if type(default) == "function" then cb = default; default = false end
+                    local row = Instance.new("Frame", Box)
+                    row.Size, row.BackgroundColor3, row.BackgroundTransparency, row.ZIndex = UDim2.new(1, 0, 0, cfg.ItemHeight), C.ItemBG, 0.7, 6
+                    AddCorner(row, 9)
+                    AddStroke(row, C.White, 1, 0.85)
+                    local rb = Instance.new("TextButton", row)
+                    rb.Size, rb.BackgroundTransparency, rb.Text, rb.ZIndex = UDim2.new(1, 0, 1, 0), 1, "", 8
+                    local label = Instance.new("TextLabel", row)
+                    label.Size, label.Position, label.Text, label.TextColor3, label.Font, label.TextSize = UDim2.new(1, -62, 1, 0), UDim2.new(0, 12, 0, 0), t, default and C.TextHi or C.Text, Enum.Font.GothamMedium, cfg.FontSize
+                    label.TextXAlignment, label.BackgroundTransparency, label.ZIndex = Enum.TextXAlignment.Left, 1, 7
+                    AddTextStroke(label, 1.2, 0.4)
+                    local track = Instance.new("Frame", row)
+                    track.Size, track.Position, track.BackgroundColor3, track.ZIndex = UDim2.new(0, isMobile and 40 or 34, 0, isMobile and 20 or 17), UDim2.new(1, isMobile and -52 or -46, 0.5, isMobile and -10 or -8), default and C.ToggleOn or C.ToggleOff, 7
+                    AddCorner(track, 9)
+                    AddStroke(track, C.White, 1, 0.7)
+                    local dot = Instance.new("Frame", track)
+                    dot.Size, dot.Position = UDim2.new(0, isMobile and 14 or 11, 0, isMobile and 14 or 11), default and UDim2.new(0, isMobile and 23 or 19, 0.5, isMobile and -7 or -5) or UDim2.new(0, 3, 0.5, isMobile and -7 or -5)
+                    dot.BackgroundColor3, dot.ZIndex = default and C.Accent or C.DotOff, 8
+                    AddCorner(dot, 8)
+                    local s = default
+                    rb.MouseButton1Click:Connect(function()
+                        s = not s
+                        Tween(dot, {0.2}, {Position = s and UDim2.new(0, isMobile and 23 or 19, 0.5, isMobile and -7 or -5) or UDim2.new(0, 3, 0.5, isMobile and -7 or -5), BackgroundColor3 = s and C.Accent or C.DotOff})
+                        Tween(track, {0.2}, {BackgroundColor3 = s and C.ToggleOn or C.ToggleOff})
+                        Tween(label, {0.2}, {TextColor3 = s and C.TextHi or C.Text})
+                        if cb then cb(s) end
+                    end)
+                    return {
+                        Set = function(_, v)
+                            s = v
+                            dot.Position = s and UDim2.new(0, isMobile and 23 or 19, 0.5, isMobile and -7 or -5) or UDim2.new(0, 3, 0.5, isMobile and -7 or -5)
+                            dot.BackgroundColor3 = s and C.Accent or C.DotOff
+                            track.BackgroundColor3 = s and C.ToggleOn or C.ToggleOff
+                            label.TextColor3 = s and C.TextHi or C.Text
+                        end
+                    }
+                end
+
+                function e:Textbox(p, d, cb)
+                    local wrap = Instance.new("Frame", Box)
+                    wrap.Size, wrap.BackgroundColor3, wrap.BackgroundTransparency = UDim2.new(1, 0, 0, cfg.ItemHeight), C.ItemBG, 0.7
+                    AddCorner(wrap, 9)
+                    AddStroke(wrap, C.White, 1, 0.8)
+                    local b = Instance.new("TextBox", wrap)
+                    b.Size, b.Position, b.Text, b.PlaceholderText, b.TextColor3 = UDim2.new(1, -22, 1, 0), UDim2.new(0, 12, 0, 0), d or "", p, C.TextHi
+                    b.Font, b.TextSize, b.BackgroundTransparency, b.ClearTextOnFocus = Enum.Font.GothamMedium, cfg.FontSize, 1, false
+                    b.PlaceholderColor3 = C.Text
+                    AddTextStroke(b, 1.2, 0.4)
+                    b.FocusLost:Connect(function() if cb then cb(b.Text) end end)
+                    return b
+                end
+
+                return e
+            end
+
+            function subObj:List(txt, data_func, select_cb)
+                local box_ref = nil
+                local function Refresh()
+                    if not box_ref then return end
+                    for _, child in pairs(box_ref:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
+                    local refBtn = Instance.new("TextButton", box_ref)
+                    refBtn.Size, refBtn.BackgroundColor3, refBtn.Text, refBtn.TextColor3 = UDim2.new(1, 0, 0, cfg.ItemHeight), C.CyanDim, "RELOAD LIST", C.TextCyan
+                    refBtn.Font, refBtn.TextSize = Enum.Font.GothamBold, 11
+                    AddCorner(refBtn, 9)
+                    AddStroke(refBtn, C.White, 1, 0.7)
+                    AddTextStroke(refBtn, 1.2, 0.4)
+                    refBtn.MouseButton1Click:Connect(Refresh)
+                    for _, n in pairs(data_func()) do
+                        local b = Instance.new("TextButton", box_ref)
+                        b.Size, b.BackgroundColor3, b.Text, b.TextColor3 = UDim2.new(1, 0, 0, cfg.ItemHeight), C.ItemBG, n, C.TextMid
+                        b.Font, b.TextSize = Enum.Font.GothamMedium, cfg.FontSize
+                        AddCorner(b, 9)
+                        AddStroke(b, C.White, 1, 0.85)
+                        AddTextStroke(b, 1.2, 0.4)
+                        b.MouseButton1Click:Connect(function() if select_cb then select_cb(n) end end)
+                    end
+                end
+                local secObj = self:Section(txt)
+                task.defer(function()
+                    local secFrame = Page:FindFirstChild("Section_" .. txt)
+                    if secFrame then box_ref = secFrame:FindFirstChild("Container"); Refresh() end
+                end)
+                return {Refresh = Refresh}
+            end
+
+            return subObj
+        end
+
+        mBtn.MouseButton1Click:Connect(function()
+            if window.currentMain and window.currentMain.btn == mBtn then return end
+            if window.currentMain then
+                Tween(window.currentMain.btn, {0.2}, {TextColor3 = C.Text, BackgroundTransparency = 1})
+                Tween(window.currentMain.line, {0.2}, {Size = UDim2.new(0, 0, 0, 2)})
+                for _, item in pairs(window.currentMain.subs) do item.btn.Visible, item.page.Visible = false, false end
+            end
+            Tween(mBtn, {0.2}, {TextColor3 = C.TextHi, BackgroundTransparency = 0.82})
+            Tween(mLine, {0.2}, {Size = UDim2.new(0, 44, 0, 2)})
+            window.currentMain = {btn = mBtn, subs = subList, line = mLine}
+            for _, item in pairs(subList) do item.btn.Visible = true end
+            if subList[1] then subList[1].activate() end
+        end)
+
+        return mainInst
+    end
+
+    local dragging, dragInput, dragStart, startPos = false, nil, nil, nil
+    Main.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging, dragStart, startPos = true, input.Position, Main.Position
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+        end
+    end)
+    uis.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            Tween(Main, {0.1}, {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)})
+        end
+    end)
+
+    return window
+end
+
+return lib
